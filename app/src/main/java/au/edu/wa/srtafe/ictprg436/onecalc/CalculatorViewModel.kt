@@ -15,7 +15,7 @@ import kotlin.math.tan
 
 class CalculatorViewModel : ViewModel() {
     var state by mutableStateOf(CalculatorState())
-    private set
+        private set
     fun onAction(action: CalculatorAction){
         when(action){
             is CalculatorAction.Number -> enterNumber(action.number)
@@ -43,6 +43,7 @@ class CalculatorViewModel : ViewModel() {
     private fun performCalculation() {
         val number1 = state.numArgOne.toDoubleOrNull()
         val number2 = state.numArgTwo.toDoubleOrNull()
+        var result = 0.0
 
         // Check if it's a single operand operation
         val singleOpList = arrayListOf(
@@ -56,26 +57,19 @@ class CalculatorViewModel : ViewModel() {
             // Check for one operand, or Bail
             if (number1 != null) {
                 // Handle single operand calculations here
-                val result = when (state.operation) {
+                result = when (state.operation) {
                     is CalculatorOperation.Sin -> sin(number1)
                     is CalculatorOperation.Cos -> cos(number1)
                     is CalculatorOperation.Tan -> tan(number1)
                     is CalculatorOperation.Sq -> sqrt(number1)
-                    // Add other single operand calculations as needed
                     else -> return
                 }
-                state = state.copy(
-                    numArgOne = result.toString().take(15),
-                    numArgTwo = "",
-                    operation = null
-                )
-                return
             }
         } else {
             // Check for two operands, or Bail
             if (number1 != null && number2 != null) {
                 // Handle two operand calculations here
-                val result = when (state.operation) {
+                result = when (state.operation) {
                     is CalculatorOperation.Add -> number1 + number2
                     is CalculatorOperation.Subtract -> number1 - number2
                     is CalculatorOperation.Multiply -> number1 * number2
@@ -91,17 +85,15 @@ class CalculatorViewModel : ViewModel() {
                     is CalculatorOperation.Power -> Math.pow(number1, number2)
                     else -> return
                 }
-                state = state.copy(
-                    numArgOne = result.toString().take(15),
-                    numArgTwo = "",
-                    operation = null
-                )
-                return
             }
         }
-
+        state = state.copy(
+            numArgOne = result.toString().take(15),
+            numArgTwo = "",
+            operation = null
+        )
     }
-    //
+
     private fun enterOperation(operation: CalculatorOperation) {
         //  We need the first argument number before we can enter an operation
         if (state.numArgOne.isNotBlank()){
